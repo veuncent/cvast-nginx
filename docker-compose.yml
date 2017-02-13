@@ -1,0 +1,30 @@
+version: '2'
+services:
+
+    nginx:
+      container_name: nginx
+      image: cvast/cvast-nginx:$NGINX_VERSION
+      restart: unless-stopped
+      build: 
+        context: .
+        dockerfile: ./Dockerfile
+      ports:
+        - '80:80'
+        - '443:443'
+      volumes:
+        - nginx-log:/var/log/nginx
+        - nginx-conf:/etc/nginx/conf.d
+        - nginx-root:/var/www
+        - letsencrypt-config:/etc/letsencrypt
+      depends_on:
+        - web
+      environment:
+        - PROXY_CONTAINER=web
+        - DOMAIN_NAMES=localhost
+        - PUBLIC_MODE=False
+        - TZ=EST
+
+volumes:
+    nginx-log:
+    nginx-conf:
+    nginx-root:
