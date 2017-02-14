@@ -1,7 +1,7 @@
 FROM nginx
 
 RUN rm -rf /usr/share/nginx/html
-# COPY public /usr/share/nginx/html
+RUN rm /etc/nginx/conf.d/default.conf
 
 RUN echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list.d/sources.list
 RUN apt-get update -y &&\
@@ -17,6 +17,7 @@ COPY install/localhost/fullchain.pem ${INSTALL_DIR}/fullchain.pem
 COPY install/localhost/privkey.pem ${INSTALL_DIR}/privkey.pem
 COPY install/nginx_strict_https.conf ${INSTALL_DIR}/nginx_strict_https.conf
 COPY install/nginx_entrypoint.sh ${INSTALL_DIR}/nginx_entrypoint.sh
+COPY install/sites-enabled ${INSTALL_DIR}/sites-enabled
 
 RUN chmod -R 700 ${INSTALL_DIR}
 RUN dos2unix ${INSTALL_DIR}/nginx_entrypoint.sh
