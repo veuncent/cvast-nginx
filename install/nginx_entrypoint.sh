@@ -6,7 +6,9 @@ LETSENCRYPT_BASEDIR="${LETSENCRYPT_BASEDIR:-/etc/letsencrypt}"
 LETSENCRYPT_LIVEDIR=${LETSENCRYPT_BASEDIR}/live
 LETSENCRYPT_LOCALHOST_DIR=${LETSENCRYPT_LIVEDIR}/localhost
 LETSENCRYPT_DOMAIN_DIR=${LETSENCRYPT_LIVEDIR}/${PRIMARY_DOMAIN_NAME}
-NGINX_DEFAULT_CONF="${NGINX_DEFAULT_CONF:-/etc/nginx/conf.d/default.conf}"
+NGINX_BASEDIR="/etc/nginx/"
+NGINX_CONF="/etc/nginx/nginx.conf"
+SITES_ENABLED_DIR="/etc/nginx/sites-enabled"
 WEB_ROOT="${WEB_ROOT:-/var/www}"
 FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
@@ -35,25 +37,26 @@ start_nginx_foreground() {
 set_search_engine_settings() {
 	if [[ ${PUBLIC_MODE} == True ]]; then
 		allow_text="" 
-		sed -i "s/<allow_or_disallow>/${allow_text}/g" ${NGINX_DEFAULT_CONF}
+		replace_values_in_dir ${SITES_ENABLED_DIR} "<allow_or_disallow>" "${allow_text}"
 	else 
 		disallow_text=" /" 
-		sed -i "s#<allow_or_disallow>#${disallow_text}#g" ${NGINX_DEFAULT_CONF}
+		replace_values_in_dir ${SITES_ENABLED_DIR} "<allow_or_disallow>" "${disallow_text}"
 	fi
 }
 
 set_strict_https_nginx_conf() {
-	cp ${INSTALL_DIR}/nginx_strict_https.conf ${NGINX_DEFAULT_CONF}
+	cp ${INSTALL_DIR}/nginx_strict_https.conf ${NGINX_CONF}
+	cp -r ${INSTALL_DIR}/sites-enabled ${NGINX_BASEDIR}
 	echo "Initializing NginX to run on: ${DOMAIN_NAMES}"
 	echo "... and serve as reverse proxy for Docker container: ${PROXY_CONTAINER}..."
-	sed -i "s/<proxy_container>/${PROXY_CONTAINER}/g" ${NGINX_DEFAULT_CONF}
-	sed -i "s/<domain_names>/${DOMAIN_NAMES}/g" ${NGINX_DEFAULT_CONF}
-	sed -i "s/<primary_domain_name>/${PRIMARY_DOMAIN_NAME}/g" ${NGINX_DEFAULT_CONF}
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<proxy_container>" "${PROXY_CONTAINER}"	
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<domain_names>" "${DOMAIN_NAMES}"	
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<primary_domain_name>" "${PRIMARY_DOMAIN_NAME}"	
 }
 
 set_nginx_certificate_paths() {
-	echo "Setting NginX certificate conf to use certificates in ${LETSENCRYPT_DOMAIN_DIR}..."
-	sed -i "s#${LETSENCRYPT_LOCALHOST_DIR}#${LETSENCRYPT_DOMAIN_DIR}#g" ${NGINX_DEFAULT_CONF}
+	echo "Setting NginX conf to use certificates in ${LETSENCRYPT_DOMAIN_DIR}..."
+	replace_values_in_dir ${SITES_ENABLED_DIR} "${LETSENCRYPT_LOCALHOST_DIR}" "${LETSENCRYPT_DOMAIN_DIR}"	
 }
 
 copy_localhost_certificates() {
@@ -75,6 +78,14 @@ check_variable() {
 	fi 
 }
 
+replace_values_in_dir() {
+	local DIRECTORY=$1
+	local ORIGINAL_VALUE=$2
+	local NEW_VALUE=$3
+	find ${DIRECTORY} -type f -exec sed -i "s#${ORIGINAL_VALUE}#${NEW_VALUE}#g" {} \;
+}
+
+
 #### Starting point
 # For LetsEncrypt acme challange
 mkdir -p ${WEB_ROOT}
@@ -86,7 +97,7 @@ set_strict_https_nginx_conf
 copy_localhost_certificates
 
 # This is in case you forget to close ports 80/443 on a test/demo environment: 
-# Environment variable PUBLIC_MODE needs to be explicitly set to True if search enginges should pick this up
+# Environment variable PUBLIC_MODE needs to be explicitly set to True if search enginges should index this website
 set_search_engine_settings
 
 start_nginx_background
