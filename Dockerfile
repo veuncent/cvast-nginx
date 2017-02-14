@@ -3,13 +3,8 @@ FROM nginx:1.11.9
 RUN rm -rf /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
 
-RUN echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list.d/sources.list
 RUN apt-get update -y &&\
-	apt-get install -y python2.7 &&\
-	apt-get install -y dos2unix &&\
-	apt-get install -y certbot -t jessie-backports
-	
-RUN apt-get install -y curl
+	apt-get install -y dos2unix
 	
 ENV INSTALL_DIR=/install
 
