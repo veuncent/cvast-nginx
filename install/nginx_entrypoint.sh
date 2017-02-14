@@ -13,10 +13,11 @@ WEB_ROOT="${WEB_ROOT:-/var/www}"
 FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
 
-CERTIFICATE_WAIT_TIMEOUT="${CERTIFICATE_WAIT_TIMEOUT:-15}"
-
 wait_for_certificate() {
-	sleep $CERTIFICATE_WAIT_TIMEOUT
+	if [[ ! -d ${LETSENCRYPT_DOMAIN_DIR} ]]; then
+		echo "Wating for certificate for ${PRIMARY_DOMAIN_NAME} to download..."
+		sleep 5
+	fi
 }
 
 start_nginx_background() {
@@ -100,9 +101,11 @@ copy_localhost_certificates
 # Environment variable PUBLIC_MODE needs to be explicitly set to True if search enginges should index this website
 set_search_engine_settings
 
-start_nginx_background
-wait_for_certificate
-stop_nginx_background
-set_nginx_certificate_paths
+if [[ "${PRIMARY_DOMAIN_NAME}" != "localhost" ]]; then
+	start_nginx_background
+	wait_for_certificate
+	stop_nginx_background
+fi
 
+set_nginx_certificate_paths
 start_nginx_foreground
