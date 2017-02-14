@@ -15,7 +15,7 @@ PRIVATE_KEY_FILENAME=privkey.pem
 
 wait_for_certificate() {
 	if [[ ! -d ${LETSENCRYPT_DOMAIN_DIR} ]]; then
-		echo "Wating for certificate for ${PRIMARY_DOMAIN_NAME} to download..."
+		echo "Waiting for certificate for ${PRIMARY_DOMAIN_NAME} to download..."
 		sleep 5
 	fi
 }
@@ -101,7 +101,7 @@ copy_localhost_certificates
 # Environment variable PUBLIC_MODE needs to be explicitly set to True if search enginges should index this website
 set_search_engine_settings
 
-if [[ "${PRIMARY_DOMAIN_NAME}" != "localhost" ]]; then
+if [[ "${PRIMARY_DOMAIN_NAME}" != "localhost" ]] && [[ ! -d ${LETSENCRYPT_DOMAIN_DIR} ]]; then
 	start_nginx_background
 	wait_for_certificate
 	stop_nginx_background
