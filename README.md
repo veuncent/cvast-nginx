@@ -1,6 +1,6 @@
 # cvast-nginx
 
-Customized Nginx instance for Docker
+Customized Nginx instance for Docker, to be used as reverse proxy.
 
 Developed by the Center for Virtualization and Applied Spatial Technologies (CVAST),
 University of South Florida
@@ -13,4 +13,4 @@ Config file inspired by:
 	
 	
 ### Mime types
-A Mime type config file can be mounted on /etc/nginx/mime.types
+To overwrite the default allowed mime.types, mount a config file over /etc/nginx/mime.types
