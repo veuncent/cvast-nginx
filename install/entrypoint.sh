@@ -51,6 +51,7 @@ set_strict_https_nginx_conf() {
 	echo "Initializing NginX to run on: ${DOMAIN_NAMES}"
 	echo "... and serve as reverse proxy for Docker container: ${PROXY_CONTAINER}..."
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<proxy_container>" "${PROXY_CONTAINER}"	
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<proxy_port>" "${PROXY_PORT}"	
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<domain_names>" "${DOMAIN_NAMES}"	
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<primary_domain_name>" "${PRIMARY_DOMAIN_NAME}"	
 }
@@ -93,6 +94,7 @@ mkdir -p ${WEB_ROOT}
 
 check_variable "${DOMAIN_NAMES}" DOMAIN_NAMES
 check_variable "${PROXY_CONTAINER}" PROXY_CONTAINER
+check_variable "${PROXY_PORT}" PROXY_PORT
 
 set_strict_https_nginx_conf
 copy_localhost_certificates
