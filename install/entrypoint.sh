@@ -14,10 +14,14 @@ FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
 
 wait_for_certificate() {
-	if [[ ! -d ${LETSENCRYPT_DOMAIN_DIR} ]]; then
-		echo "Waiting for certificate for ${PRIMARY_DOMAIN_NAME} to download..."
-		sleep 5
-	fi
+	while true; do
+		if [[ ! -d ${LETSENCRYPT_DOMAIN_DIR} ]]; then
+			echo "Waiting for certificate for ${PRIMARY_DOMAIN_NAME} to download..."
+			sleep 5
+		else
+			break
+		fi
+	done
 }
 
 start_nginx_background() {
