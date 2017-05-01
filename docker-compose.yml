@@ -16,8 +16,10 @@ services:
         - nginx-conf:/etc/nginx/
         - nginx-root:/var/www
       environment:
-        - PROXY_CONTAINER=web
-        - PROXY_PORT=8000
+        - REMOTE_PROXY_HOST=<remote_proxy_container>
+        - REMOTE_PROXY_PORT=443
+        - LOCAL_PROXY_HOST=<local_proxy_container>
+        - LOCAL_PROXY_PORT=8000
         - DOMAIN_NAMES=localhost
         - PUBLIC_MODE=False
         - TZ=EST

@@ -12,8 +12,10 @@ Config file inspired by:
 	
 ## Environment variables
 See docker-compose.yml for examples  
-	- PROXY_CONTAINER=<host name of proxy container>   (Usually service title as specified in docker-compose.yml)  
-	- PROXY_PORT=8000  
+	- LOCAL_PROXY_HOST=<host name of local proxy container>   (Can be service title as specified in docker-compose.yml)  
+	- LOCAL_PROXY_PORT=8000  
+	- REMOTE_PROXY_HOST=<host name of remote proxy container>   (Can be service title as specified in docker-compose.yml)  
+	- REMOTE_PROXY_PORT=8000  
 	- DOMAIN_NAMES=example.com www.example.com  
 	- PUBLIC_MODE=False    (Specified whether search engine crawlers may index this web app. Default=False)  
 	- TZ=EST  (Time zone, optional)

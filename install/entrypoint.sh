@@ -53,11 +53,15 @@ set_strict_https_nginx_conf() {
 	cp ${INSTALL_DIR}/nginx_strict_https.conf ${NGINX_CONF}
 	cp -r ${INSTALL_DIR}/sites-enabled ${NGINX_BASEDIR}
 	echo "Initializing NginX to run on: ${DOMAIN_NAMES}"
-	echo "... and serve as reverse proxy for Docker container: ${PROXY_CONTAINER}..."
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<proxy_container>" "${PROXY_CONTAINER}"	
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<proxy_port>" "${PROXY_PORT}"	
+	echo "... and serve as reverse proxy for local Docker container: ${LOCAL_PROXY_HOST}..."
+	echo "... and remote Docker container: ${REMOTE_PROXY_HOST}..."
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<local_proxy_host>" "${LOCAL_PROXY_HOST}"	
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<local_proxy_port>" "${LOCAL_PROXY_PORT}"	
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_host>" "${REMOTE_PROXY_HOST}"	
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_port>" "${REMOTE_PROXY_PORT}"	
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<domain_names>" "${DOMAIN_NAMES}"	
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<primary_domain_name>" "${PRIMARY_DOMAIN_NAME}"	
+
 }
 
 set_nginx_certificate_paths() {
@@ -97,8 +101,10 @@ replace_values_in_dir() {
 mkdir -p ${WEB_ROOT}
 
 check_variable "${DOMAIN_NAMES}" DOMAIN_NAMES
-check_variable "${PROXY_CONTAINER}" PROXY_CONTAINER
-check_variable "${PROXY_PORT}" PROXY_PORT
+check_variable "${LOCAL_PROXY_HOST}" LOCAL_PROXY_HOST
+check_variable "${LOCAL_PROXY_PORT}" LOCAL_PROXY_PORT
+check_variable "${REMOTE_PROXY_HOST}" REMOTE_PROXY_HOST
+check_variable "${REMOTE_PROXY_PORT}" REMOTE_PROXY_PORT
 
 set_strict_https_nginx_conf
 copy_localhost_certificates
