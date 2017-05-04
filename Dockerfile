@@ -8,6 +8,10 @@ RUN apt-get update -y &&\
 	
 ENV INSTALL_DIR=/install
 
+# forward request and error logs to docker log collector
+RUN ln -sf /dev/stdout /var/log/nginx/access.log
+RUN ln -sf /dev/stderr /var/log/nginx/error.log
+
 COPY install/localhost/fullchain.pem ${INSTALL_DIR}/fullchain.pem
 COPY install/localhost/privkey.pem ${INSTALL_DIR}/privkey.pem
 COPY install/nginx_strict_https.conf ${INSTALL_DIR}/nginx_strict_https.conf

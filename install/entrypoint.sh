@@ -12,6 +12,7 @@ SITES_ENABLED_DIR="/etc/nginx/sites-enabled"
 WEB_ROOT="${WEB_ROOT:-/var/www}"
 FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
+NGINX_PROXY_MODE=${NGINX_PROXY_MODE:-local_and_remote}
 
 wait_for_certificate() {
 	while true; do
@@ -49,19 +50,35 @@ set_search_engine_settings() {
 	fi
 }
 
-set_strict_https_nginx_conf() {
-	cp ${INSTALL_DIR}/nginx_strict_https.conf ${NGINX_CONF}
-	cp -r ${INSTALL_DIR}/sites-enabled ${NGINX_BASEDIR}
+initialize_nginx_configuration() {
+	echo ""
 	echo "Initializing NginX to run on: ${DOMAIN_NAMES}"
-	echo "... and serve as reverse proxy for local Docker container: ${LOCAL_PROXY_HOST}..."
-	echo "... and remote Docker container: ${REMOTE_PROXY_HOST}..."
+	echo ""
+	echo "Setting Nginx up as reverse proxy for **local** Docker container: ${LOCAL_PROXY_HOST}..."
+	if [[ "${NGINX_PROXY_MODE}" == "local_and_remote" ]]; then
+		echo "Setting Nginx up as reverse proxy for **remote** Docker container: ${REMOTE_PROXY_HOST}..."
+	fi
+
+	copy_nginx_configuration_files
+	set_nginx_environment_variables
+}
+
+copy_nginx_configuration_files() {
+	echo "Copying Nginx configuration files..."
+	mkdir -p ${NGINX_BASEDIR}/sites-enabled
+	cp ${INSTALL_DIR}/nginx_strict_https.conf ${NGINX_CONF}
+	cp ${INSTALL_DIR}/sites-enabled/http.conf ${NGINX_BASEDIR}/sites-enabled/http.conf
+	cp ${INSTALL_DIR}/sites-enabled/https_${NGINX_PROXY_MODE}_proxy.conf ${NGINX_BASEDIR}/sites-enabled/https.conf
+}
+
+set_nginx_environment_variables() {
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<local_proxy_host>" "${LOCAL_PROXY_HOST}"	
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<local_proxy_port>" "${LOCAL_PROXY_PORT}"	
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_host>" "${REMOTE_PROXY_HOST}"	
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_port>" "${REMOTE_PROXY_PORT}"	
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_subpath>" "${REMOTE_PROXY_SUBPATH}"	
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<domain_names>" "${DOMAIN_NAMES}"	
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<primary_domain_name>" "${PRIMARY_DOMAIN_NAME}"	
-
 }
 
 set_nginx_certificate_paths() {
@@ -103,10 +120,14 @@ mkdir -p ${WEB_ROOT}
 check_variable "${DOMAIN_NAMES}" DOMAIN_NAMES
 check_variable "${LOCAL_PROXY_HOST}" LOCAL_PROXY_HOST
 check_variable "${LOCAL_PROXY_PORT}" LOCAL_PROXY_PORT
-check_variable "${REMOTE_PROXY_HOST}" REMOTE_PROXY_HOST
-check_variable "${REMOTE_PROXY_PORT}" REMOTE_PROXY_PORT
 
-set_strict_https_nginx_conf
+if [[ "${NGINX_PROXY_MODE}" == "local_and_remote" ]]; then
+	check_variable "${REMOTE_PROXY_HOST}" REMOTE_PROXY_HOST
+	check_variable "${REMOTE_PROXY_PORT}" REMOTE_PROXY_PORT
+	check_variable "${REMOTE_PROXY_SUBPATH}" REMOTE_PROXY_SUBPATH
+fi
+
+initialize_nginx_configuration
 copy_localhost_certificates
 
 # This is in case you forget to close ports 80/443 on a test/demo environment: 
