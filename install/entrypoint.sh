@@ -66,7 +66,7 @@ initialize_nginx_configuration() {
 copy_nginx_configuration_files() {
 	echo "Copying Nginx configuration files..."
 	mkdir -p ${NGINX_BASEDIR}/sites-enabled
-	cp ${INSTALL_DIR}/nginx_strict_https.conf ${NGINX_CONF}
+	cp ${INSTALL_DIR}/nginx_base.conf ${NGINX_CONF}
 	cp ${INSTALL_DIR}/sites-enabled/http.conf ${NGINX_BASEDIR}/sites-enabled/http.conf
 	cp ${INSTALL_DIR}/sites-enabled/https_${NGINX_PROXY_MODE}_proxy.conf ${NGINX_BASEDIR}/sites-enabled/https.conf
 }
