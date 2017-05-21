@@ -5,7 +5,7 @@ services:
       container_name: nginx
       image: cvast/cvast-nginx:latest
       restart: unless-stopped
-      build: 
+      build:
         context: .
         dockerfile: ./Dockerfile
       ports:
@@ -16,8 +16,11 @@ services:
         - nginx-conf:/etc/nginx/
         - nginx-root:/var/www
       environment:
+        - NGINX_PROTOCOL=strict-https
+        - NGINX_PROXY_MODE=local_and_remote
         - REMOTE_PROXY_HOST=<remote_proxy_container>
         - REMOTE_PROXY_PORT=443
+        - REMOTE_PROXY_SUBPATH=/database
         - LOCAL_PROXY_HOST=<local_proxy_container>
         - LOCAL_PROXY_PORT=8000
         - DOMAIN_NAMES=localhost

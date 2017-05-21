@@ -7,12 +7,11 @@ LETSENCRYPT_LIVEDIR=${LETSENCRYPT_BASEDIR}/live
 LETSENCRYPT_LOCALHOST_DIR=${LETSENCRYPT_LIVEDIR}/localhost
 LETSENCRYPT_DOMAIN_DIR=${LETSENCRYPT_LIVEDIR}/${PRIMARY_DOMAIN_NAME}
 NGINX_BASEDIR="/etc/nginx/"
-NGINX_CONF="/etc/nginx/nginx.conf"
-SITES_ENABLED_DIR="/etc/nginx/sites-enabled"
+NGINX_CONF=${NGINX_BASEDIR}/nginx.conf
+SITES_ENABLED_DIR=${NGINX_BASEDIR}/sites-enabled
 WEB_ROOT="${WEB_ROOT:-/var/www}"
 FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
-NGINX_PROXY_MODE=${NGINX_PROXY_MODE:-local_and_remote}
 
 wait_for_certificate() {
 	while true; do
@@ -42,10 +41,10 @@ start_nginx_foreground() {
 
 set_search_engine_settings() {
 	if [[ ${PUBLIC_MODE} == True ]]; then
-		allow_text="" 
+		allow_text=""
 		replace_values_in_dir ${SITES_ENABLED_DIR} "<allow_or_disallow>" "${allow_text}"
-	else 
-		disallow_text=" /" 
+	else
+		disallow_text=" /"
 		replace_values_in_dir ${SITES_ENABLED_DIR} "<allow_or_disallow>" "${disallow_text}"
 	fi
 }
@@ -65,25 +64,30 @@ initialize_nginx_configuration() {
 
 copy_nginx_configuration_files() {
 	echo "Copying Nginx configuration files..."
-	mkdir -p ${NGINX_BASEDIR}/sites-enabled
+	mkdir -p ${SITES_ENABLED_DIR}
 	cp ${INSTALL_DIR}/nginx_base.conf ${NGINX_CONF}
-	cp ${INSTALL_DIR}/sites-enabled/http.conf ${NGINX_BASEDIR}/sites-enabled/http.conf
-	cp ${INSTALL_DIR}/sites-enabled/https_${NGINX_PROXY_MODE}_proxy.conf ${NGINX_BASEDIR}/sites-enabled/https.conf
+	cp ${INSTALL_DIR}/sites-enabled/https_${NGINX_PROXY_MODE}_proxy.conf ${SITES_ENABLED_DIR}/https.conf
+
+	if [[ "${NGINX_PROTOCOL}" == "strict-https" ]]; then
+		cp ${INSTALL_DIR}/sites-enabled/http-strict-https.conf ${SITES_ENABLED_DIR}/http.conf
+	else
+		cp ${INSTALL_DIR}/sites-enabled/http.conf ${SITES_ENABLED_DIR}/http.conf
+	fi
 }
 
 set_nginx_environment_variables() {
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<local_proxy_host>" "${LOCAL_PROXY_HOST}"	
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<local_proxy_port>" "${LOCAL_PROXY_PORT}"	
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_host>" "${REMOTE_PROXY_HOST}"	
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_port>" "${REMOTE_PROXY_PORT}"	
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_subpath>" "${REMOTE_PROXY_SUBPATH}"	
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<domain_names>" "${DOMAIN_NAMES}"	
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<primary_domain_name>" "${PRIMARY_DOMAIN_NAME}"	
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<local_proxy_host>" "${LOCAL_PROXY_HOST}"
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<local_proxy_port>" "${LOCAL_PROXY_PORT}"
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_host>" "${REMOTE_PROXY_HOST}"
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_port>" "${REMOTE_PROXY_PORT}"
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_subpath>" "${REMOTE_PROXY_SUBPATH}"
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<domain_names>" "${DOMAIN_NAMES}"
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<primary_domain_name>" "${PRIMARY_DOMAIN_NAME}"
 }
 
 set_nginx_certificate_paths() {
 	echo "Setting NginX conf to use certificates in ${LETSENCRYPT_DOMAIN_DIR}..."
-	replace_values_in_dir ${SITES_ENABLED_DIR} "${LETSENCRYPT_LOCALHOST_DIR}" "${LETSENCRYPT_DOMAIN_DIR}"	
+	replace_values_in_dir ${SITES_ENABLED_DIR} "${LETSENCRYPT_LOCALHOST_DIR}" "${LETSENCRYPT_DOMAIN_DIR}"
 }
 
 copy_localhost_certificates() {
@@ -93,7 +97,30 @@ copy_localhost_certificates() {
 	fi
 	if [[ ! -f ${LETSENCRYPT_LOCALHOST_DIR}/${PRIVATE_KEY_FILENAME} ]]; then
 		cp ${INSTALL_DIR}/${PRIVATE_KEY_FILENAME} ${LETSENCRYPT_LOCALHOST_DIR}
-	fi	
+	fi
+}
+
+check_all_variables() {
+	check_variable "${DOMAIN_NAMES}" DOMAIN_NAMES
+	check_variable "${LOCAL_PROXY_HOST}" LOCAL_PROXY_HOST
+	check_variable "${LOCAL_PROXY_PORT}" LOCAL_PROXY_PORT
+	check_variable "${NGINX_PROXY_MODE}" NGINX_PROXY_MODE
+	check_variable "${NGINX_PROTOCOL}" NGINX_PROXY_MODE
+
+	if [[ ! "${NGINX_PROTOCOL}" == "http" ]] && [[ ! "${NGINX_PROTOCOL}" == "strict-https" ]]; then
+		echo "Invalid value for NGINX_PROTOCOL, exiting..."
+		exit 1
+	fi
+
+	if [[ "${NGINX_PROXY_MODE}" == "local_and_remote" ]]; then
+		check_variable "${REMOTE_PROXY_HOST}" REMOTE_PROXY_HOST
+		check_variable "${REMOTE_PROXY_PORT}" REMOTE_PROXY_PORT
+		check_variable "${REMOTE_PROXY_SUBPATH}" REMOTE_PROXY_SUBPATH
+		if [[ ! ${REMOTE_PROXY_SUBPATH} == /* ]]; then
+			echo "ERROR! Parameter REMOTE_PROXY_SUBPATH should be a path starting with '/'. Exiting..."
+			exit 1
+		fi
+	fi
 }
 
 check_variable() {
@@ -102,7 +129,7 @@ check_variable() {
 	if [[ -z ${VARIABLE_VALUE} ]] || [[ "${VARIABLE_VALUE}" == "" ]]; then
 		echo "ERROR! Environment variable ${VARIABLE_NAME} not specified. Exiting..."
 		exit 1
-	fi 
+	fi
 }
 
 replace_values_in_dir() {
@@ -117,20 +144,11 @@ replace_values_in_dir() {
 # For LetsEncrypt acme challange
 mkdir -p ${WEB_ROOT}
 
-check_variable "${DOMAIN_NAMES}" DOMAIN_NAMES
-check_variable "${LOCAL_PROXY_HOST}" LOCAL_PROXY_HOST
-check_variable "${LOCAL_PROXY_PORT}" LOCAL_PROXY_PORT
-
-if [[ "${NGINX_PROXY_MODE}" == "local_and_remote" ]]; then
-	check_variable "${REMOTE_PROXY_HOST}" REMOTE_PROXY_HOST
-	check_variable "${REMOTE_PROXY_PORT}" REMOTE_PROXY_PORT
-	check_variable "${REMOTE_PROXY_SUBPATH}" REMOTE_PROXY_SUBPATH
-fi
-
+check_all_variables
 initialize_nginx_configuration
 copy_localhost_certificates
 
-# This is in case you forget to close ports 80/443 on a test/demo environment: 
+# This is in case you forget to close ports 80/443 on a test/demo environment:
 # Environment variable PUBLIC_MODE needs to be explicitly set to True if search enginges should index this website
 set_search_engine_settings
 
