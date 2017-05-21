@@ -1,4 +1,4 @@
-FROM nginx:1.11.9
+FROM nginx:1.13
 
 RUN rm -rf /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
