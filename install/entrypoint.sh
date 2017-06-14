@@ -71,7 +71,7 @@ copy_nginx_configuration_files() {
 	if [[ "${NGINX_PROTOCOL}" == "strict-https" ]]; then
 		cp ${INSTALL_DIR}/sites-enabled/http-strict-https.conf ${SITES_ENABLED_DIR}/http.conf
 	else
-		cp ${INSTALL_DIR}/sites-enabled/http.conf ${SITES_ENABLED_DIR}/http.conf
+		cp ${INSTALL_DIR}/sites-enabled/http_${NGINX_PROXY_MODE}_proxy.conf ${SITES_ENABLED_DIR}/http.conf
 	fi
 }
 
@@ -109,6 +109,11 @@ check_all_variables() {
 
 	if [[ ! "${NGINX_PROTOCOL}" == "http" ]] && [[ ! "${NGINX_PROTOCOL}" == "strict-https" ]]; then
 		echo "Invalid value for NGINX_PROTOCOL, exiting..."
+		exit 1
+	fi
+
+	if [[ ! "${NGINX_PROXY_MODE}" == "local" ]] && [[ ! "${NGINX_PROXY_MODE}" == "local_and_remote" ]]; then
+		echo "Invalid value for NGINX_PROXY_MODE, exiting..."
 		exit 1
 	fi
 
