@@ -12,9 +12,9 @@ services:
         - '80:80'
         - '443:443'
       volumes:
+        - ./web/wwwroot:/var/www
+        - ./letsencrypt:/etc/letsencrypt
         - nginx-log:/var/log/nginx
-        - nginx-conf:/etc/nginx/
-        - nginx-root:/var/www
       environment:
         - NGINX_PROTOCOL=strict-https
         - NGINX_PROXY_MODE=local_and_remote
@@ -27,7 +27,25 @@ services:
         - PUBLIC_MODE=False
         - TZ=EST
 
+
+    letsencrypt:
+      container_name: letsencrypt
+      image: cvast/cvast-letsencrypt:1.1
+      volumes:
+        - ./web/wwwroot:/var/www
+        - ./letsencrypt:/etc/letsencrypt
+        - letsencrypt-log:/var/log/letsencrypt
+      command: get_certificate
+      environment:
+        - FORCE_NON_ELB=True
+        - LETSENCRYPT_EMAIL=info@example.com
+        - DOMAIN_NAMES=example.com www.example.com
+        - PRODUCTION_MODE=True
+        - PERSISTENT_MODE=True
+        - TZ=EST
+      labels:
+        org.label-schema.group: "prod-cvast-arches-monitoring"
+
 volumes:
     nginx-log:
-    nginx-conf:
-    nginx-root:
+    letsencrypt-log:
