@@ -37,7 +37,7 @@ services:
         - letsencrypt-log:/var/log/letsencrypt
       command: get_certificate
       environment:
-        - FORCE_NON_ELB=True
+        - MODE=regular
         - LETSENCRYPT_EMAIL=info@example.com
         - DOMAIN_NAMES=example.com www.example.com
         - PRODUCTION_MODE=True
