@@ -66,13 +66,22 @@ copy_nginx_configuration_files() {
 	echo "Copying Nginx configuration files..."
 	mkdir -p ${SITES_ENABLED_DIR}
 	cp ${INSTALL_DIR}/nginx_base.conf ${NGINX_CONF}
-	cp ${INSTALL_DIR}/sites-enabled/https_${NGINX_PROXY_MODE}_proxy.conf ${SITES_ENABLED_DIR}/https.conf
+	copy_nginx_http_conf
+	if [[ "${NGINX_PROTOCOL}" == "strict-https" ]]; then
+		copy_nginx_https_conf
+	fi
+}
 
+copy_nginx_http_conf() {
 	if [[ "${NGINX_PROTOCOL}" == "strict-https" ]]; then
 		cp ${INSTALL_DIR}/sites-enabled/http-strict-https.conf ${SITES_ENABLED_DIR}/http.conf
 	else
 		cp ${INSTALL_DIR}/sites-enabled/http_${NGINX_PROXY_MODE}_proxy.conf ${SITES_ENABLED_DIR}/http.conf
 	fi
+}
+
+copy_nginx_https_conf() {
+	cp ${INSTALL_DIR}/sites-enabled/https_${NGINX_PROXY_MODE}_proxy.conf ${SITES_ENABLED_DIR}/https.conf
 }
 
 set_nginx_environment_variables() {
@@ -157,11 +166,12 @@ copy_localhost_certificates
 # Environment variable PUBLIC_MODE needs to be explicitly set to True if search enginges should index this website
 set_search_engine_settings
 
-if [[ "${PRIMARY_DOMAIN_NAME}" != "localhost" ]] && [[ ! -d ${LETSENCRYPT_DOMAIN_DIR} ]]; then
+if [[ "${PRIMARY_DOMAIN_NAME}" != "localhost" ]] && [[ ! -d ${LETSENCRYPT_DOMAIN_DIR} ]] && [[ "${NGINX_PROTOCOL}" == "strict-https" ]]; then
 	start_nginx_background
 	wait_for_certificate
 	stop_nginx_background
+	set_nginx_certificate_paths
 fi
 
-set_nginx_certificate_paths
+
 start_nginx_foreground
