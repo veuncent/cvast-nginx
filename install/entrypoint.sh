@@ -49,6 +49,11 @@ set_search_engine_settings() {
 	fi
 }
 
+set_static_url() {
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<static_url>" "${STATIC_URL}"
+}
+
+
 initialize_nginx_configuration() {
 	echo ""
 	echo "Initializing NginX to run on: ${DOMAIN_NAMES}"
@@ -60,6 +65,7 @@ initialize_nginx_configuration() {
 
 	copy_nginx_configuration_files
 	set_nginx_environment_variables
+	set_static_url
 }
 
 copy_nginx_configuration_files() {

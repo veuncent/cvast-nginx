@@ -33,6 +33,8 @@ The path for which traffic needs to be redirected to the remote proxy, E.g. /dat
 Protocol by which this Nginx server may be addressed. When in https-only mode, all http requests are redirected as https.  
 - DOMAIN_NAMES=example.com www.example.com  
 Domain names by which this Nginx server can be targeted. Can be multiple, space separated domain names  
+- STATIC_URL=/path
+URL from which to serve static files  
 - PUBLIC_MODE=True | False  
 Specify whether search engine crawlers may index this web app. Default=False  
 - TZ=EST  
