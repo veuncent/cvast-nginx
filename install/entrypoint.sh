@@ -101,8 +101,10 @@ set_nginx_environment_variables() {
 }
 
 set_nginx_certificate_paths() {
-	echo "Setting NginX conf to use certificates in ${LETSENCRYPT_DOMAIN_DIR}..."
-	replace_values_in_dir ${SITES_ENABLED_DIR} "${LETSENCRYPT_LOCALHOST_DIR}" "${LETSENCRYPT_DOMAIN_DIR}"
+	if [[ "${PRIMARY_DOMAIN_NAME}" != "localhost" ]]; then
+		echo "Setting NginX conf to use certificates in ${LETSENCRYPT_DOMAIN_DIR}..."
+		replace_values_in_dir ${SITES_ENABLED_DIR} "${LETSENCRYPT_LOCALHOST_DIR}" "${LETSENCRYPT_DOMAIN_DIR}"
+	fi
 }
 
 copy_localhost_certificates() {
@@ -176,8 +178,7 @@ if [[ "${PRIMARY_DOMAIN_NAME}" != "localhost" ]] && [[ ! -d ${LETSENCRYPT_DOMAIN
 	start_nginx_background
 	wait_for_certificate
 	stop_nginx_background
-	set_nginx_certificate_paths
 fi
 
-
+set_nginx_certificate_paths
 start_nginx_foreground
