@@ -3,7 +3,7 @@ services:
 
     nginx:
       container_name: nginx
-      image: cvast/cvast-nginx:latest
+      image: vmeijer/nginx-proxy:latest
       restart: unless-stopped
       build:
         context: .
