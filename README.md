@@ -2,19 +2,25 @@
 
 Customized Nginx image for Docker, to be used as reverse proxy.
 
-Developed by the Center for Virtualization and Applied Spatial Technologies (CVAST),
-University of South Florida  
 
 Config file inspired by:  
-	- https://gist.github.com/plentz/6737338  
-	- https://calomel.org/nginx.html Option 4: Nginx reverse proxy  
-	- https://medium.com/@gutschilla/deploying-let-s-encrypt-in-production-13d7a4bfa546  
-	
-## Local and Remote proxies
+	- [plentz' gist](https://gist.github.com/plentz/6737338)  
+	- [calomel.org](https://calomel.org/nginx.html) (Option 4: Nginx reverse proxy)  
+	- [Martin Gutsch's blog post](https://medium.com/@gutschilla/deploying-let-s-encrypt-in-production-13d7a4bfa546)  
+  
+
+# Contents
+*   [Local and Remote proxies](#local-and-remote-proxies)
+*   [Environment variables](#environment-variables)
+*   [Configuration](#configuration)
+*   [Mime types](#mime-types)
+
+
+# Local and Remote proxies
 By default, all traffic on the root path (/) is forwarded using the HTTP protocol to the location specified in the LOCAL_PROXY_HOST environment variable.  
 In addition, you can (optionally) route traffic for a specific subpath (REMOTE_PROXY_SUBPATH env variable) to another destination (REMOTE_PROXY_HOST env variable). For this, the original protocol (http/https) of the request is used.  
 
-## Environment variables
+# Environment variables
 See docker-compose.yml for examples  
 
 - NGINX_PROXY_MODE=local | local_and_remote (Required).  
