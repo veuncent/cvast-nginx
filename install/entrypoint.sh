@@ -10,7 +10,7 @@ NGINX_BASEDIR="/etc/nginx/"
 NGINX_CONF=${NGINX_BASEDIR}/nginx.conf
 SITES_ENABLED_DIR=${NGINX_BASEDIR}/sites-enabled
 WEB_ROOT="${WEB_ROOT:-/var/www}"
-STATIC_URL="${STATIC_URL:-/media}"
+STATIC_URL="${STATIC_URL:-/static}"
 FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
 
