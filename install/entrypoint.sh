@@ -14,6 +14,8 @@ STATIC_URL="${STATIC_URL:-/static}"
 FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
 
+MIME_TYPES="${MIME_TYPES:-default}"
+
 wait_for_certificate() {
 	while true; do
 		if [[ ! -d ${LETSENCRYPT_DOMAIN_DIR} ]]; then
@@ -162,6 +164,18 @@ replace_values_in_dir() {
 	find ${DIRECTORY} -type f -exec sed -i "s#${ORIGINAL_VALUE}#${NEW_VALUE}#g" {} \;
 }
 
+set_mime_types() {
+	if [[ ${MIME_TYPES} == "default" ]]; then
+		echo "Using default Nginx mime types."
+	elif [[ ${MIME_TYPES} == "3D" ]]; then
+		# rm -f /etc/nginx/mime.types
+		cp ${INSTALL_DIR}/mime.types.3d /etc/nginx/mime.types
+		echo "Using mime types for 3D content."
+	else
+		echo "Invalid value for environment variable MIME_TYPES, using default."
+	fi
+}
+
 
 #### Starting point
 # For LetsEncrypt acme challange
@@ -182,4 +196,5 @@ if [[ "${PRIMARY_DOMAIN_NAME}" != "localhost" ]] && [[ ! -d ${LETSENCRYPT_DOMAIN
 fi
 
 set_nginx_certificate_paths
+set_mime_types
 start_nginx_foreground
