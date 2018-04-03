@@ -23,6 +23,8 @@ services:
         - REMOTE_PROXY_SUBPATH=/database
         - LOCAL_PROXY_HOST=<local_proxy_container>
         - LOCAL_PROXY_PORT=8000
+        - STATIC_URL=/static
+        - MEDIA_URL=/media
         - DOMAIN_NAMES=localhost
         - PUBLIC_MODE=False
         - TZ=EST

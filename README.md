@@ -48,6 +48,9 @@ Domain names by which this Nginx server can be targeted. Can be multiple, space 
 - STATIC_URL=/path  
 URL from which to serve static files. If specified, static files will be served from /www/static on the Nginx container. Make sure to copy your static files to that directory, e.g. by mounting a volume on it
 
+- MEDIA_URL=/path  
+URL from which to serve media files. If specified, media files will be served from /www/media on the Nginx container. Make sure to copy your media files to that directory, e.g. by mounting a volume on it
+
 - PUBLIC_MODE=True | False  
 Specify whether search engine crawlers may index this web app. Default=False  
 

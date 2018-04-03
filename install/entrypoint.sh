@@ -11,6 +11,7 @@ NGINX_CONF=${NGINX_BASEDIR}/nginx.conf
 SITES_ENABLED_DIR=${NGINX_BASEDIR}/sites-enabled
 WEB_ROOT="${WEB_ROOT:-/var/www}"
 STATIC_URL=${STATIC_URL}
+MEDIA_URL=${MEDIA_URL}
 FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
 
@@ -61,6 +62,16 @@ set_static_url() {
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<static_url_location_block>" "${static_url_location_block}"
 }
 
+set_media_url() {
+	if [[ ! -z ${MEDIA_URL} ]] && [[ ! "${MEDIA_URL}" == "" ]]; then
+		media_url_location_block="location ${MEDIA_URL} {	alias /www/media/; }"
+	else
+		media_url_location_block=""
+	fi
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<media_url_location_block>" "${media_url_location_block}"
+
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<media_url>" "${MEDIA_URL}"
+}
 
 initialize_nginx_configuration() {
 	echo ""
@@ -74,6 +85,7 @@ initialize_nginx_configuration() {
 	copy_nginx_configuration_files
 	set_nginx_environment_variables
 	set_static_url
+	set_media_url
 }
 
 copy_nginx_configuration_files() {
