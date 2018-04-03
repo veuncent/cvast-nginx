@@ -10,7 +10,7 @@ NGINX_BASEDIR="/etc/nginx/"
 NGINX_CONF=${NGINX_BASEDIR}/nginx.conf
 SITES_ENABLED_DIR=${NGINX_BASEDIR}/sites-enabled
 WEB_ROOT="${WEB_ROOT:-/var/www}"
-STATIC_URL="${STATIC_URL:-/static}"
+STATIC_URL=${STATIC_URL}
 FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
 
@@ -53,7 +53,12 @@ set_search_engine_settings() {
 }
 
 set_static_url() {
-	replace_values_in_dir ${SITES_ENABLED_DIR} "<static_url>" "${STATIC_URL}"
+	if [[ ! -z ${STATIC_URL} ]] && [[ ! "${STATIC_URL}" == "" ]]; then
+		static_url_location_block="location ${STATIC_URL} {	alias /www/static/; }"
+	else
+		static_url_location_block=""
+	fi
+	replace_values_in_dir ${SITES_ENABLED_DIR} "<static_url_location_block>" "${static_url_location_block}"
 }
 
 
