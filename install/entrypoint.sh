@@ -193,6 +193,7 @@ set_mime_types() {
 }
 
 clear_cache() {
+	echo "Clearing cache..."
 	rm -rf /tmp/web_cache/*
 }
 
