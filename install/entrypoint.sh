@@ -192,6 +192,10 @@ set_mime_types() {
 	fi
 }
 
+clear_cache() {
+	rm -rf /tmp/web_cache/*
+}
+
 
 #### Starting point
 # For LetsEncrypt acme challange
@@ -213,4 +217,5 @@ fi
 
 set_nginx_certificate_paths
 set_mime_types
+clear_cache
 start_nginx_foreground
