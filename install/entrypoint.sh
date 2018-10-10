@@ -185,7 +185,6 @@ set_mime_types() {
 	if [[ ${MIME_TYPES} == "default" ]]; then
 		echo "Using default Nginx mime types."
 	elif [[ ${MIME_TYPES} == "3D" ]]; then
-		# rm -f /etc/nginx/mime.types
 		cp ${INSTALL_DIR}/mime.types.3d /etc/nginx/mime.types
 		echo "Using mime types for 3D content."
 	else
