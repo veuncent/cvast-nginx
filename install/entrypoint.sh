@@ -118,6 +118,8 @@ set_nginx_environment_variables() {
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<remote_proxy_subpath>" "${REMOTE_PROXY_SUBPATH}"
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<domain_names>" "${DOMAIN_NAMES}"
 	replace_values_in_dir ${SITES_ENABLED_DIR} "<primary_domain_name>" "${PRIMARY_DOMAIN_NAME}"
+	replace_values_in_dir ${NGINX_BASEDIR} "<script_source_allowed_hosts>" "${SCRIPT_SOURCE_ALLOWED_HOSTS}"
+	replace_values_in_dir ${NGINX_BASEDIR} "<x_frame_allowed_hosts>" "${X_FRAME_ALLOWED_HOSTS}"
 }
 
 set_nginx_certificate_paths() {
