@@ -14,6 +14,7 @@ COPY install/nginx_base.conf ${INSTALL_DIR}/nginx_base.conf
 COPY install/entrypoint.sh ${INSTALL_DIR}/entrypoint.sh
 COPY install/sites-enabled ${INSTALL_DIR}/sites-enabled
 COPY install/mime.types.3d ${INSTALL_DIR}/mime.types.3d
+COPY install/include.static_files ${INSTALL_DIR}/include.static_files
 
 
 RUN chmod -R 700 ${INSTALL_DIR}

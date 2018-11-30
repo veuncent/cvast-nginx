@@ -9,6 +9,7 @@ LETSENCRYPT_DOMAIN_DIR=${LETSENCRYPT_LIVEDIR}/${PRIMARY_DOMAIN_NAME}
 NGINX_BASEDIR="/etc/nginx/"
 NGINX_CONF=${NGINX_BASEDIR}/nginx.conf
 SITES_ENABLED_DIR=${NGINX_BASEDIR}/sites-enabled
+INCLUDE_STATIC_FILES_PATH=${NGINX_BASEDIR}/include.static_files
 WEB_ROOT="${WEB_ROOT:-/var/www}"
 STATIC_URL=${STATIC_URL}
 MEDIA_URL=${MEDIA_URL}
@@ -55,7 +56,7 @@ set_search_engine_settings() {
 
 set_static_url() {
 	if [[ ! -z ${STATIC_URL} ]] && [[ ! "${STATIC_URL}" == "" ]]; then
-		static_url_location_block="location ${STATIC_URL} {	alias /www/static/; }"
+		static_url_location_block="location ${STATIC_URL} {	alias /www/static/; include ${INCLUDE_STATIC_FILES_PATH}; }"
 	else
 		static_url_location_block=""
 	fi
@@ -91,8 +92,11 @@ initialize_nginx_configuration() {
 copy_nginx_configuration_files() {
 	echo "Copying Nginx configuration files..."
 	mkdir -p ${SITES_ENABLED_DIR}
+
 	cp ${INSTALL_DIR}/nginx_base.conf ${NGINX_CONF}
+	cp ${INSTALL_DIR}/include.static_files ${INCLUDE_STATIC_FILES_PATH}
 	copy_nginx_http_conf
+
 	if [[ "${NGINX_PROTOCOL}" == "strict-https" ]]; then
 		copy_nginx_https_conf
 	fi
