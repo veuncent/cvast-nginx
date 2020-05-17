@@ -15,6 +15,8 @@ STATIC_URL=${STATIC_URL}
 MEDIA_URL=${MEDIA_URL}
 FULLCHAIN_FILENAME=fullchain.pem
 PRIVATE_KEY_FILENAME=privkey.pem
+NGINX_RELOAD_SLEEP_TIME_DEFAULT=24h
+NGINX_RELOAD_SLEEP_TIME="${NGINX_RELOAD_SLEEP_TIME:-$NGINX_RELOAD_SLEEP_TIME_DEFAULT}"
 
 MIME_TYPES="${MIME_TYPES:-default}"
 
@@ -39,9 +41,13 @@ stop_nginx_background() {
 	service nginx stop
 }
 
-start_nginx_foreground() {
+start_nginx_foreground_with_reload() {
 	echo "Running Nginx on ${DOMAIN_NAME} in the foreground"
-	exec nginx -g 'daemon off;'
+	while :; do
+		echo "Reloading NGINX in ${NGINX_RELOAD_SLEEP_TIME}"
+		sleep ${NGINX_RELOAD_SLEEP_TIME} & wait ${!};
+		nginx -s reload;
+	done & nginx -g 'daemon off;'
 }
 
 set_search_engine_settings() {
@@ -225,4 +231,4 @@ fi
 set_nginx_certificate_paths
 set_mime_types
 clear_cache
-start_nginx_foreground
+start_nginx_foreground_with_reload
